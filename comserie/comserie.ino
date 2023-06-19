@@ -16,13 +16,6 @@ void loop() {
 
 void readLM35() {
   msg = "";
-  //if (Serial.available()) {
-  //    delay(10);
-  //    while (Serial.available() > 0) {
-  //        msg += (char)Serial.read();
-  //    }
-  //    Serial.flush();
-  //}
   float valueADC = analogRead(lm35_pin);
   float volts = (valueADC / 1023.0) * 5;
   float celsius = volts * 100.00;
