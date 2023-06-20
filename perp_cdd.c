@@ -5,8 +5,6 @@
 #define DEVICE_NAME "mychardev"
 #define BUF_LEN 80
 
-MODULE_LICENSE("GPL");
-
 static int Major;
 //static char msg[BUF_LEN];
 static char *msg_Ptr;
@@ -66,3 +64,8 @@ static void __exit chardev_exit(void)
 
 module_init(chardev_init);
 module_exit(chardev_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Peaky Coders");
+MODULE_DESCRIPTION("Módulo CDD Para leer datos de /dev/ttyUSB0");
+MODULE_VERSION("0.1");
