@@ -2,25 +2,51 @@
 <html>
 <head>
     <title>Aplicación de Sensado</title>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        h1 {
+            margin-top: 50px;
+        }
+
+        .button-container {
+            margin-top: 30px;
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .button-container button:hover {
+            background-color: #45a049;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <h1>Aplicación de Sensado</h1>
-    <form id="form-boton">
+    <div class="button-container">
         <button type="button" onclick="sensarBoton()">Sensar señal del botón</button>
-    </form>
+    </div>
 
-    <form id="form-microfono">
+    <div class="button-container">
         <button type="button" onclick="sensarMicrofono()">Sensar señal del micrófono</button>
-    </form>
+    </div>
 
     <script>
-        function sensarBoton() {
+	function sensarBoton() {
             $.ajax({
                 url: '/sensar_boton',
                 type: 'GET',
                 success: function(response) {
-                    alert(response);
+                    console.log(response);
                 }
             });
         }
@@ -30,10 +56,11 @@
                 url: '/sensar_microfono',
                 type: 'GET',
                 success: function(response) {
-                    alert(response);
+                    console.log(response);
                 }
             });
         }
+
     </script>
 </body>
 </html>
