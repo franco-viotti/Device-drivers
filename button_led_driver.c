@@ -6,12 +6,12 @@
 #include <linux/gpio.h>
 #include <linux/delay.h>
 
-/* Meta Information */
+/* Informacion */
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Peaky Coders");
-MODULE_DESCRIPTION("Gpio driver que sensar 2 Seniales");
+MODULE_DESCRIPTION("Character device driver que mide dos señales externas");
 
-/* Variables for device and device class */
+/* Variables para el dispositivo y la clase del dispositivo */
 static dev_t my_device_nr;
 static struct class *my_class;
 static struct cdev my_device;
@@ -20,36 +20,35 @@ static struct cdev my_device;
 #define DRIVER_CLASS "MyModuleClass"
 
 /**
- * @brief Read data out of the buffer
+ * @brief Lee los datos del buffer
  */
 static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, loff_t *offs) {
 	int to_copy, not_copied, delta;
 	char tmp[22];
 	int value,adjusted_value;
 
-	/* Get amount of data to copy */
+	/* Obtiene la cantidad de datos a copiar */
 	to_copy = min(count, sizeof(tmp)-1);
 
-	/* Read value of button */
+	/* Lee el valor del boton */
 	if(gpio_get_value(4)){
-	printk("Value of button: %d\n", gpio_get_value(22));
-	value = gpio_get_value(22);
-    adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
+		printk("Valor del boton: %d\n", gpio_get_value(22));
+		value = gpio_get_value(22);
+		adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
 
-	//tmp[0] = gpio_get_value(22) + '0';
-	snprintf(tmp, sizeof(tmp), "Sensor con valor: %d\n",adjusted_value );
-	not_copied = copy_to_user(user_buffer, &tmp, to_copy);
+		snprintf(tmp, sizeof(tmp), "Sensor con valor: %d\n",adjusted_value );
+		not_copied = copy_to_user(user_buffer, &tmp, to_copy);
 	}
 	else{
-	printk("Value of button: %d\n", gpio_get_value(17));
-	value = gpio_get_value(17);
-    adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
-	//tmp[0] = gpio_get_value(17) + '0';
-	snprintf(tmp, sizeof(tmp), "Boton con valor: %d \n",adjusted_value );
-	not_copied = copy_to_user(user_buffer, &tmp, to_copy);
+		printk("Valor del boton: %d\n", gpio_get_value(17));
+		value = gpio_get_value(17);
+		adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
+		
+		snprintf(tmp, sizeof(tmp), "Boton con valor: %d \n",adjusted_value );
+		not_copied = copy_to_user(user_buffer, &tmp, to_copy);
 	}
 
-	/* Calculate data */
+	/* Calcular datos */
 	delta = to_copy - not_copied;
 
 	msleep(500);
@@ -58,19 +57,19 @@ static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, l
 }
 
 /**
- * @brief Write data to buffer
+ * @brief Escribe los datos al buffer
  */
 static ssize_t driver_write(struct file *File, const char *user_buffer, size_t count, loff_t *offs) {
 	int to_copy, not_copied, delta;
 	char value;
 
-	/* Get amount of data to copy */
+	/* Obtiene la cantidad de datos a copiar */
 	to_copy = min(count, sizeof(value));
 
-	/* Copy data to user */
+	/* Copia los datos al user */
 	not_copied = copy_from_user(&value, user_buffer, to_copy);
 
-	/* Setting the LED */
+	/* Establece el LED */
 	switch(value) {
 		case '0':
 			gpio_set_value(4, 0);
@@ -79,29 +78,29 @@ static ssize_t driver_write(struct file *File, const char *user_buffer, size_t c
 			gpio_set_value(4, 1);
 			break;
 		default:
-			printk("Invalid Input!\n");
+			printk("Entrada invalida!\n");
 			break;
 	}
 
-	/* Calculate data */
+	/* Calcular datos */
 	delta = to_copy - not_copied;
 
 	return delta;
 }
 
 /**
- * @brief This function is called, when the device file is opened
+ * @brief Llama a la funcion cuando el device file es abierto
  */
 static int driver_open(struct inode *device_file, struct file *instance) {
-	printk("dev_nr - open was called!\n");
+	printk("dev_nr - open fue llamda!\n");
 	return 0;
 }
 
 /**
- * @brief This function is called, when the device file is opened
+ * @brief Llama a la funcion cuando el device file es cerrado
  */
 static int driver_close(struct inode *device_file, struct file *instance) {
-	printk("dev_nr - close was called!\n");
+	printk("dev_nr - close fue llamada!\n");
 	return 0;
 }
 
@@ -114,71 +113,71 @@ static struct file_operations fops = {
 };
 
 /**
- * @brief This function is called, when the module is loaded into the kernel
+ * @brief Llama a la funcion cuando se carga el modulo en el kernel
  */
 static int __init ModuleInit(void) {
-	printk("Hello, Kernel!\n");
+	printk("Hola Kernel!\n");
 
-	/* Allocate a device nr */
+	/* Aloca un numero de device */
 	if( alloc_chrdev_region(&my_device_nr, 0, 1, DRIVER_NAME) < 0) {
-		printk("Device Nr. could not be allocated!\n");
+		printk("Device nr. no pudo ser alocado\n");
 		return -1;
 	}
-	printk("read_write - Device Nr. Major: %d, Minor: %d was registered!\n", my_device_nr >> 20, my_device_nr && 0xfffff);
+	printk("read_write - Device Nr. Major: %d, Minor: %d fue registrado!\n", my_device_nr >> 20, my_device_nr && 0xfffff);
 
-	/* Create device class */
+	/* Crea la device class */
 	if((my_class = class_create(THIS_MODULE, DRIVER_CLASS)) == NULL) {
-		printk("Device class can not be created!\n");
+		printk("Device class no pudo ser creada\n");
 		goto ClassError;
 	}
 
-	/* create device file */
+	/* Crea el device file */
 	if(device_create(my_class, NULL, my_device_nr, NULL, DRIVER_NAME) == NULL) {
-		printk("Can not create device file!\n");
+		printk("Device file no pudo ser creado\n");
 		goto FileError;
 	}
 
-	/* Initialize device file */
+	/* Inicializa el device file */
 	cdev_init(&my_device, &fops);
 
-	/* Regisering device to kernel */
+	/* Se registra el device en el kernel */
 	if(cdev_add(&my_device, my_device_nr, 1) == -1) {
-		printk("Registering of device to kernel failed!\n");
+		printk("Fallo el registro del device en el kernel\n");
 		goto AddError;
 	}
 
 	/* GPIO 4 init */
 	if(gpio_request(4, "rpi-gpio-4")) {
-		printk("Can not allocate GPIO 4\n");
+		printk("No se puede alocar GPIO 4\n");
 		goto AddError;
 	}
 
-	/* Set GPIO 4 direction */
+	/* Direccion del GPIO */
 	if(gpio_direction_output(4, 0)) {
-		printk("Can not set GPIO 4 to output!\n");
+		printk("No se puede setear GPIO 4 como salida\n");
 		goto Gpio4Error;
 	}
 
 	/* GPIO 17 init */
 	if(gpio_request(17, "rpi-gpio-17")) {
-		printk("Can not allocate GPI 17\n");
+		printk("No se puede alocar GPI 17\n");
 		goto Gpio17Error;
 	}
 
-	/* Set GPIO 17 direction */
+	/* Direccion del GPIO */
 	if(gpio_direction_input(17)) {
-		printk("Can not set GPIO 17 to input!\n");
+		printk("No se puede setear GPIO 17 como entrada!\n");
 		goto Gpio17Error;
 	}
     	/* PIO 22 init */
 	if(gpio_request(22, "rpi-gpio-22")) {
-		printk("Can not allocate GPIO 22\n");
+		printk("No se puede alocar GPIO 22\n");
 		goto Gpio22Error;
 	}
 
-	/* Set GPIO 17 direction */
+	/* Direccion del GPIO */
 	if(gpio_direction_input(22)) {
-		printk("Can not set GPIO 22 to input!\n");
+		printk("No se puede setear GPIO 22 como entrada!\n");
 		goto Gpio22Error;
 	}
 
@@ -200,7 +199,7 @@ ClassError:
 }
 
 /**
- * @brief This function is called, when the module is removed from the kernel
+ * @brief La funcion es llamada cuando el modulo es removido del kernel
  */
 static void __exit ModuleExit(void) {
 	gpio_set_value(4, 0);
@@ -211,7 +210,7 @@ static void __exit ModuleExit(void) {
 	device_destroy(my_class, my_device_nr);
 	class_destroy(my_class);
 	unregister_chrdev_region(my_device_nr, 1);
-	printk("Goodbye, Kernel\n");
+	printk("Adios Kernel!\n");
 }
 
 module_init(ModuleInit);
