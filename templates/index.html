@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aplicación de Sensado</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Aplicación de Sensado</h1>
+    <form id="form-boton">
+        <button type="button" onclick="sensarBoton()">Sensar señal del botón</button>
+    </form>
+
+    <form id="form-microfono">
+        <button type="button" onclick="sensarMicrofono()">Sensar señal del micrófono</button>
+    </form>
+
+    <script>
+        function sensarBoton() {
+            $.ajax({
+                url: '/sensar_boton',
+                type: 'GET',
+                success: function(response) {
+                    alert(response);
+                }
+            });
+        }
+
+        function sensarMicrofono() {
+            $.ajax({
+                url: '/sensar_microfono',
+                type: 'GET',
+                success: function(response) {
+                    alert(response);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
