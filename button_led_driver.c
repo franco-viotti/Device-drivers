@@ -1,7 +1,6 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/fs.h>
-//#include <unistd.h>
 #include <linux/cdev.h>
 #include <linux/uaccess.h>
 #include <linux/gpio.h>
@@ -25,27 +24,30 @@ static struct cdev my_device;
  */
 static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, loff_t *offs) {
 	int to_copy, not_copied, delta;
-	char tmp[3] = " \n";
+	char tmp[22];
+	int value,adjusted_value;
 
 	/* Get amount of data to copy */
-	to_copy = min(count, sizeof(tmp));
+	to_copy = min(count, sizeof(tmp)-1);
 
 	/* Read value of button */
 	if(gpio_get_value(4)){
 	printk("Value of button: %d\n", gpio_get_value(22));
-	tmp[0] = gpio_get_value(22) + '0';
-	
+	value = gpio_get_value(22);
+    adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
+
+	//tmp[0] = gpio_get_value(22) + '0';
+	snprintf(tmp, sizeof(tmp), "Sensor con valor: %d\n",adjusted_value );
 	not_copied = copy_to_user(user_buffer, &tmp, to_copy);
 	}
 	else{
 	printk("Value of button: %d\n", gpio_get_value(17));
-	tmp[0] = gpio_get_value(17) + '0';
+	value = gpio_get_value(17);
+    adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
+	//tmp[0] = gpio_get_value(17) + '0';
+	snprintf(tmp, sizeof(tmp), "Boton con valor: %d \n",adjusted_value );
 	not_copied = copy_to_user(user_buffer, &tmp, to_copy);
 	}
-    //printk("Value of button: %d\n", gpio_get_value(22));
-	//tmp[0] = gpio_get_value(22) + '0';
-
-    //not_copied += copy_to_user(user_buffer, &tmp, to_copy);
 
 	/* Calculate data */
 	delta = to_copy - not_copied;
@@ -159,7 +161,7 @@ static int __init ModuleInit(void) {
 
 	/* GPIO 17 init */
 	if(gpio_request(17, "rpi-gpio-17")) {
-		printk("Can not allocate GPIO 17\n");
+		printk("Can not allocate GPI 17\n");
 		goto Gpio17Error;
 	}
 
