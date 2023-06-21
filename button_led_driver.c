@@ -32,7 +32,6 @@ static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, l
 
 	/* Lee el valor del boton */
 	if(gpio_get_value(4)){
-		printk("Valor del boton: %d\n", gpio_get_value(22));
 		value = gpio_get_value(22);
 		adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
 
@@ -40,7 +39,6 @@ static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, l
 		not_copied = copy_to_user(user_buffer, &tmp, to_copy);
 	}
 	else{
-		printk("Valor del boton: %d\n", gpio_get_value(17));
 		value = gpio_get_value(17);
 		adjusted_value = value ? 1 : 0;  // Ajustar el valor a 0 o 1
 		
