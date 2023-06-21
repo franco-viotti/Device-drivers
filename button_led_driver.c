@@ -9,8 +9,8 @@
 
 /* Meta Information */
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Johannes 4 GNU/Linux");
-MODULE_DESCRIPTION("A simple gpio driver for setting a LED and reading a button");
+MODULE_AUTHOR("Peaky Coders");
+MODULE_DESCRIPTION("Gpio driver que sensar 2 Seniales");
 
 /* Variables for device and device class */
 static dev_t my_device_nr;
@@ -31,16 +31,17 @@ static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, l
 	to_copy = min(count, sizeof(tmp));
 
 	/* Read value of button */
+	if(gpio_get_value(4)){
 	printk("Value of button: %d\n", gpio_get_value(22));
 	tmp[0] = gpio_get_value(22) + '0';
-//	printk("Value of button: %d\n", gpio_get_value(17));
-//	tmp[0] = gpio_get_value(17) + '0';
-    // ! TODO: sleep add
-
-
-	/* Copy data to user */
+	
 	not_copied = copy_to_user(user_buffer, &tmp, to_copy);
-
+	}
+	else{
+	printk("Value of button: %d\n", gpio_get_value(17));
+	tmp[0] = gpio_get_value(17) + '0';
+	not_copied = copy_to_user(user_buffer, &tmp, to_copy);
+	}
     //printk("Value of button: %d\n", gpio_get_value(22));
 	//tmp[0] = gpio_get_value(22) + '0';
 
@@ -167,7 +168,7 @@ static int __init ModuleInit(void) {
 		printk("Can not set GPIO 17 to input!\n");
 		goto Gpio17Error;
 	}
-    	/* GPIO 22 init */
+    	/* PIO 22 init */
 	if(gpio_request(22, "rpi-gpio-22")) {
 		printk("Can not allocate GPIO 22\n");
 		goto Gpio22Error;
