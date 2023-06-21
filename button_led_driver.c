@@ -1,9 +1,11 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/fs.h>
+//#include <unistd.h>
 #include <linux/cdev.h>
 #include <linux/uaccess.h>
 #include <linux/gpio.h>
+#include <linux/delay.h>
 
 /* Meta Information */
 MODULE_LICENSE("GPL");
@@ -29,14 +31,25 @@ static ssize_t driver_read(struct file *File, char *user_buffer, size_t count, l
 	to_copy = min(count, sizeof(tmp));
 
 	/* Read value of button */
-	printk("Value of button: %d\n", gpio_get_value(17));
-	tmp[0] = gpio_get_value(17) + '0';
+	printk("Value of button: %d\n", gpio_get_value(22));
+	tmp[0] = gpio_get_value(22) + '0';
+//	printk("Value of button: %d\n", gpio_get_value(17));
+//	tmp[0] = gpio_get_value(17) + '0';
+    // ! TODO: sleep add
+
 
 	/* Copy data to user */
 	not_copied = copy_to_user(user_buffer, &tmp, to_copy);
 
+    //printk("Value of button: %d\n", gpio_get_value(22));
+	//tmp[0] = gpio_get_value(22) + '0';
+
+    //not_copied += copy_to_user(user_buffer, &tmp, to_copy);
+
 	/* Calculate data */
 	delta = to_copy - not_copied;
+
+	msleep(500);
 
 	return delta;
 }
@@ -146,7 +159,7 @@ static int __init ModuleInit(void) {
 	/* GPIO 17 init */
 	if(gpio_request(17, "rpi-gpio-17")) {
 		printk("Can not allocate GPIO 17\n");
-		goto Gpio4Error;
+		goto Gpio17Error;
 	}
 
 	/* Set GPIO 17 direction */
@@ -154,9 +167,22 @@ static int __init ModuleInit(void) {
 		printk("Can not set GPIO 17 to input!\n");
 		goto Gpio17Error;
 	}
+    	/* GPIO 22 init */
+	if(gpio_request(22, "rpi-gpio-22")) {
+		printk("Can not allocate GPIO 22\n");
+		goto Gpio22Error;
+	}
+
+	/* Set GPIO 17 direction */
+	if(gpio_direction_input(22)) {
+		printk("Can not set GPIO 22 to input!\n");
+		goto Gpio22Error;
+	}
 
 
 	return 0;
+Gpio22Error:
+	gpio_free(22);
 Gpio17Error:
 	gpio_free(17);
 Gpio4Error:
@@ -176,6 +202,7 @@ ClassError:
 static void __exit ModuleExit(void) {
 	gpio_set_value(4, 0);
 	gpio_free(17);
+    gpio_free(22);
 	gpio_free(4);
 	cdev_del(&my_device);
 	device_destroy(my_class, my_device_nr);
@@ -186,3 +213,4 @@ static void __exit ModuleExit(void) {
 
 module_init(ModuleInit);
 module_exit(ModuleExit);
+
